@@ -138,7 +138,7 @@ quote_start_flows = ['Input - Travel - Policy Type',
                         'Input - Maid - Policy Coverage', 
                         'Input - PA - Insured Persons',
                         'Input - Home - Usage'
-                    ]
+                    ] + [f'Quote - {Travel} - Profile' for Travel in ['Travel', 'Motor', 'PA', 'Home', 'Maid']]
 for i in shop_code_to_phone.keys():
     quote_code_dict[i] = 0
     for num in shop_code_to_phone[i]:

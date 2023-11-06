@@ -138,7 +138,7 @@ quote_start_flows = ['Input - Travel - Policy Type',
                     'Input - Maid - Policy Coverage', 
                     'Input - PA - Insured Persons',
                     'Input - Home - Usage'
-                    ]
+                    ] + [f'Quote - {Travel} - Profile' for Travel in ['Travel', 'Motor', 'PA', 'Home', 'Maid']]
 for date in list(df['Date'].unique()):
     resps = list(df['Response Flow'].loc[df['Date'] == date])
     resps = [e for e in resps if isinstance(e, str)]
