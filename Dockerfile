@@ -15,8 +15,6 @@ RUN git clone https://github.com/wb-00/streamlit-gina.git .
 
 RUN pip3 install --upgrade pip
 
-RUN head requirements.txt
-
 RUN pip3 install -r requirements.txt
 
 EXPOSE 8501
