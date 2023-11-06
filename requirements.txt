@@ -1,0 +1,9 @@
+pandas
+streamlit
+numpy
+matplotlib
+country-named-entity-recognition
+geopy
+folium
+datetime
+plotly
