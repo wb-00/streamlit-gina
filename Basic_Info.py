@@ -234,7 +234,11 @@ elif st.session_state["authentication_status"]:
     # Create a pie chart using Plotly Express
     fig = px.pie(df_, names='Label', values='Value')
     st.markdown("## User Source")
-    st.markdown("Note: Returning users in this case are users who first messaged GINA over 7 days ago and have now messaged again within the last 7 days.")
+    s = ""
+    if number_of_weeks>1:
+        s = "s"
+        
+    st.markdown(f"Note: Returning users in this case are users who first messaged GINA over {number_of_weeks} week{s} ago and have now messaged again within the last {number_of_weeks} week{s}.")
     
     # Display the pie chart using st.plotly_chart()
     st.plotly_chart(fig)

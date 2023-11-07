@@ -169,13 +169,15 @@ elif st.session_state["authentication_status"]:
                 "Date of Birth": "Unknown",
                 "Gender": "Unknown",
                 "Plan Type": "Unknown",
-                "Lead Time": -1
+                "Lead Time": -1,
+                "Trip Type": "Unknown"
             }
         
             dob = find_successive_line(demodata[i][0], "Policyholder date of birth: ", i)
             gender = find_successive_line(demodata[i][0], "Policyholder gender: ", i)
             plantype = find_successive_line(demodata[i][0], "Coverage plan: ", i)
             depdate = find_successive_line(demodata[i][0], "Departure date: ", i)
+            triptype = find_successive_line(demodata[i][0], "Trip type: ", i)
             searchdate = demodata[i][1]
             if depdate != "":
                 depdate = pd.to_datetime(depdate, dayfirst=True)
@@ -191,6 +193,8 @@ elif st.session_state["authentication_status"]:
                 buyerdict["Gender"] = gender
             if plantype != "":
                 buyerdict["Plan Type"] = plantype
+            if triptype != "":
+                buyerdict["Trip Type"] = triptype
             buyerinfo.append(buyerdict)
         
         return pd.DataFrame(buyerinfo)
@@ -246,27 +250,9 @@ elif st.session_state["authentication_status"]:
     st.bar_chart(dests_new)
     
     # Policy type (single, annual)
-    def find_numbers(df, nums, col, flow_string):
-        result = []
-        for num in nums:
-            found = False
-            flows = df[col].loc[df['User/Session ID'] == num]
-            for flow in flows:
-                if isinstance(flow, str):
-                    if flow == flow_string:
-                        found = True
-            if found:
-                result.append(num)
-        return result
-    
-    plantype = []
-    for i in find_numbers(df, numbers, 'Clicked Text', 'Single trip'):
-        plantype.append('Single trip')
-        
-    for i in find_numbers(df, numbers, 'Clicked Text', 'Annual plan'):
-        plantype.append('Annual plan')
-    
-    plantype = dict(Counter(plantype))
+    labels = list(df_['Trip Type'].unique())
+    values = [len(df_.loc[df_['Trip Type']==e]) for e in labels]
+    plantype = {labels[i]:values[i] for i in range(len(labels))}
     
     st.markdown("## Plan type")
     st.bar_chart(plantype)
