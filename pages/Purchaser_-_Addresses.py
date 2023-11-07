@@ -158,7 +158,6 @@ elif st.session_state["authentication_status"]:
     display_map(coordinates)
     
     # Map
-    st.markdown("## Address")
     HtmlFile = open("address_map.html", 'r', encoding='utf-8')
     source_code = HtmlFile.read()
     components.html(source_code, height = 600)
