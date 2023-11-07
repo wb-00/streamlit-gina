@@ -114,50 +114,6 @@ elif st.session_state["authentication_status"]:
     buyers = get_buyer_numbers(df, numbers)
     
     @st.cache_data
-    def get_addresses(df, nums):
-        addresses = []
-        for num in nums:
-            found = False
-            resps = df['Response Data'].loc[(df['User/Session ID'] == num) & (df['Response Flow'] == 'Buy - Travel - Confirm')]
-            resps = [r for r in resps if isinstance(r, str)]
-            for resp in resps:
-                if "Policyholder address:" in resp:
-                    found = (find_successive_line(resp, "Policyholder address: ", 0))
-    
-            if found:
-                addresses.append(found)
-        return addresses                      
-    
-    addresses = get_addresses(df, buyers)
-    
-    @st.cache_data
-    def geocode_addresses(addresses):
-        geolocator = Nominatim(user_agent="myGeocoder")
-        coordinates = []
-        for address in addresses:
-            try:
-                location = geolocator.geocode(address, timeout=10)
-                if location:
-                    coordinates.append((location.latitude, location.longitude))
-            except GeocoderTimedOut:
-                pass  # Handle timeouts by skipping this address or adding it to a retry queue
-        return coordinates
-    
-    addresses = [a.split(",")[0]+","+a.split(",")[2][:-7] for a in addresses]
-    coordinates = geocode_addresses(addresses)
-    
-    @st.cache_data
-    def display_map(coordinates):
-        map = folium.Map(location=[1.3521, 103.8198], zoom_start=12)  # Use the center of Singapore as the starting location
-    
-        for coord in coordinates:
-            folium.Marker(location=coord).add_to(map)
-    
-        map.save("address_map.html")
-    
-    display_map(coordinates)
-    
-    @st.cache_data
     def get_demodata(df, nums):
         demodata = {}
         for number in nums:
@@ -273,9 +229,3 @@ elif st.session_state["authentication_status"]:
     
     st.markdown("## Policy coverage")
     st.bar_chart(gender_dict)
-    
-    # Map
-    st.markdown("## Address")
-    HtmlFile = open("address_map.html", 'r', encoding='utf-8')
-    source_code = HtmlFile.read()
-    components.html(source_code, height = 600)
