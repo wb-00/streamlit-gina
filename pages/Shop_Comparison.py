@@ -91,22 +91,16 @@ elif st.session_state["authentication_status"]:
     dates_list = sorted(df['Date'].unique())
     dates_dict = {}
     kopinumbers = []
+    for number in numbers:
+        kopiq = False
+        flows = df['Response Data'].loc[(df['User/Session ID'] == number)]
+        for flow in flows:
+            if isinstance(flow, str):
+                if 'Cool! You have successfully redeemed your Kopi/Teh' in flow:
+                    kopiq = True
     
-    for date in dates_list:
-        kopinumbers_ = []
-        
-        for number in numbers:
-            kopiq = False
-            flows = df['Response Data'].loc[(df['User/Session ID'] == number) & (df['Date'] == date)]
-            for flow in flows:
-                if isinstance(flow, str):
-                    if 'Cool! You have successfully redeemed your Kopi/Teh' in flow:
-                        kopiq = True
-        
-            if kopiq:
-                kopinumbers_.append(number)
-        dates_dict[date[5:]]=len(pd.unique(kopinumbers_))
-        kopinumbers += kopinumbers_
+        if kopiq:
+            kopinumbers.append(number)
     
     nonkopinumbers = [e for e in numbers if not e in kopinumbers]
     
