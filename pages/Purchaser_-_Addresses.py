@@ -9,6 +9,7 @@ import datetime
 import folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",

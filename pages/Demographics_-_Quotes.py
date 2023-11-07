@@ -9,6 +9,7 @@ import datetime
 import folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",
@@ -137,7 +138,15 @@ elif st.session_state["authentication_status"]:
     
     st.markdown("## Destination")
     st.markdown("Note: we parse the destinations when the user types them rather than when the quote is completed so there may be a higher total than expected for this chart")
-    st.bar_chart(dests_new)
+    #st.bar_chart(dests_new)
+
+    data = dests_new
+    c = (
+        alt.Chart(pd.DataFrame({'Country':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Country", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Policy type
     plantypes = []
@@ -159,17 +168,41 @@ elif st.session_state["authentication_status"]:
         
     
     st.markdown("## Plan type")
-    st.bar_chart(dict(Counter(plantypes)))
+    #st.bar_chart(dict(Counter(plantypes)))
+
+    data = dict(Counter(plantypes))
+    c = (
+        alt.Chart(pd.DataFrame({'Type':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Type", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Policy coverage
     
     
     st.markdown("## Plan coverage")
-    st.bar_chart(dict(Counter(coverages)))
+    #st.bar_chart(dict(Counter(coverages)))
+
+    data = dict(Counter(coverages))
+    c = (
+        alt.Chart(pd.DataFrame({'Coverage':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Coverage", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Policy purpose
     
     
     st.markdown("## Plan purpose")
-    st.bar_chart(dict(Counter(purposes)))
+    #st.bar_chart(dict(Counter(purposes)))
+
+    data = dict(Counter(purposes))
+    c = (
+        alt.Chart(pd.DataFrame({'Purpose':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Purpose", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     

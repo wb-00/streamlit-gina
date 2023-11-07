@@ -9,6 +9,7 @@ import datetime
 import folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",
@@ -170,10 +171,18 @@ elif st.session_state["authentication_status"]:
     # Decade of Birth
     dob_list = df_['Date of Birth'].tolist()
     birth_years = [int(datetime.datetime.strptime(str(date)[:10], '%Y-%m-%d').year) for date in dob_list]
-    birth_years = dict(Counter([(e // 10)*10 for e in birth_years]))
+    birth_years = dict(Counter([str((e // 10)*10) for e in birth_years]))
     
     st.markdown("## Birth decade (policyholder)")
-    st.bar_chart(birth_years)
+    #st.bar_chart(birth_years)
+
+    data = birth_years
+    c = (
+        alt.Chart(pd.DataFrame({'Decade':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Decade", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Gender
     labels = list(df_['Gender'].unique())
@@ -181,7 +190,14 @@ elif st.session_state["authentication_status"]:
     gender_dict = {labels[i]:values[i] for i in range(len(labels))}
     
     st.markdown("## Gender (policyholder)")
-    st.bar_chart(gender_dict)
+    #st.bar_chart(gender_dict)
+    data = gender_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Gender':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Gender", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Destination
     def find_destinations(df, nums):
@@ -212,7 +228,15 @@ elif st.session_state["authentication_status"]:
     dests_new = pd.Series(Counter(dests_new)).sort_values(ascending=False).to_dict()
     print(dests_new)
     st.markdown("## Destination")
-    st.bar_chart(dests_new)
+    #st.bar_chart(dests_new)
+    
+    data = dests_new
+    c = (
+        alt.Chart(pd.DataFrame({'Country':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Country", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Policy type (single, annual)
     labels = list(df_['Trip Type'].unique())
@@ -220,7 +244,15 @@ elif st.session_state["authentication_status"]:
     plantype = {labels[i]:values[i] for i in range(len(labels))}
     
     st.markdown("## Plan type")
-    st.bar_chart(plantype)
+    #st.bar_chart(plantype)
+
+    data = plantype
+    c = (
+        alt.Chart(pd.DataFrame({'Type':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Type", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Policy coverage (family etc.)
     labels = list(df_['Plan Type'].unique())
@@ -228,4 +260,12 @@ elif st.session_state["authentication_status"]:
     gender_dict = {labels[i]:values[i] for i in range(len(labels))}
     
     st.markdown("## Policy coverage")
-    st.bar_chart(gender_dict)
+    #st.bar_chart(gender_dict)
+
+    data = gender_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Coverage':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Coverage", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)

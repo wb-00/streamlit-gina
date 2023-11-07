@@ -10,6 +10,7 @@ from geopy.exc import GeocoderTimedOut
 import plotly.express as px
 import streamlit_authenticator as stauth
 import streamlit as st
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",
@@ -162,7 +163,15 @@ elif st.session_state["authentication_status"]:
     dates = sorted([e[5:] for e in df['Date']])
     dates_counted = dict(Counter(dates))
     st.markdown("## Messages per day")
-    st.bar_chart(dates_counted)
+    #st.bar_chart(dates_counted)
+
+    data = dates_counted
+    c = (
+        alt.Chart(pd.DataFrame({'Date':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Date", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     ## Users per day
     users = []
@@ -172,7 +181,15 @@ elif st.session_state["authentication_status"]:
     users = sorted([e[5:] for e in users])
     users_counted = dict(Counter(users))
     st.markdown("## Users per day")
-    st.bar_chart(users_counted)
+    #st.bar_chart(users_counted)
+
+    data = users_counted
+    c = (
+        alt.Chart(pd.DataFrame({'Date':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Date", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     ## Quotes started per day
     quotes = {e[5:]:0 for e in list(df['Date'].unique())}
@@ -189,7 +206,15 @@ elif st.session_state["authentication_status"]:
         quotes[date[5:]] = np.sum(resps)
     
     st.markdown("## Quotes started per day")
-    st.bar_chart(quotes)
+    #st.bar_chart(quotes)
+
+    data = quotes
+    c = (
+        alt.Chart(pd.DataFrame({'Date':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Date", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     ## Quotes completed per day
     quotes = {e[5:]:0 for e in list(df['Date'].unique())}
@@ -201,8 +226,16 @@ elif st.session_state["authentication_status"]:
         quotes[date[5:]] = np.sum(resps)
         
     st.markdown("## Quotes completed per day")
-    st.bar_chart(quotes)
+    #st.bar_chart(quotes)
     
+    data = quotes
+    c = (
+        alt.Chart(pd.DataFrame({'Date':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Date", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
+
     ## Purchases per day
     quotes = {e[5:]:0 for e in list(df['Date'].unique())}
     quote_end_flows = ['Pay - Inforce Policy', 'Pay - Credit Card']
@@ -214,7 +247,15 @@ elif st.session_state["authentication_status"]:
         
     st.markdown("## Purchases per day")
     st.markdown("Note: Due to technical limitations from the data extraction this chart actually shows the number of users who clicked pay by credit card plus the number of users who successfully purchased using PayNow.")
-    st.bar_chart(quotes)
+    #st.bar_chart(quotes)
+
+    data = quotes
+    c = (
+        alt.Chart(pd.DataFrame({'Date':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Date", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     ## User source
     categories = ['Returning User',

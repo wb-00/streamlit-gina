@@ -8,7 +8,7 @@ import folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 import streamlit as st
-
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",
@@ -134,7 +134,15 @@ elif st.session_state["authentication_status"]:
         code_dict[i] = len(shop_code_to_phone[i])
     
     st.markdown("## Redemptions per shop")
-    st.bar_chart(code_dict)
+    #st.bar_chart(code_dict)
+
+    data = code_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Shop code':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Shop code", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     @st.cache_data
     def get_voucher_dict(df, shop_code_to_phone):
@@ -156,7 +164,15 @@ elif st.session_state["authentication_status"]:
     voucher_dict = get_voucher_dict(df, shop_code_to_phone)
     
     st.markdown("## Vouchers per shop")
-    st.bar_chart(voucher_dict)
+    #st.bar_chart(voucher_dict)
+
+    data = voucher_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Shop code':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Shop code", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     quote_code_dict = {}
     quote_start_flows = ['Input - Travel - Policy Type', 
@@ -174,7 +190,15 @@ elif st.session_state["authentication_status"]:
             quote_code_dict[i] += np.sum(resps)
         
     st.markdown("## Quotes started per shop")
-    st.bar_chart(quote_code_dict)
+    #st.bar_chart(quote_code_dict)
+
+    data = quote_code_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Shop code':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Shop code", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     quote_code_dict = {}
     quote_end_flows = ['Quote - '+e+' - Complete' for e in ['Travel', 'Motor', 'PA', 'Home', 'Maid']]
@@ -188,7 +212,15 @@ elif st.session_state["authentication_status"]:
         
     
     st.markdown("## Quotes completed per shop")
-    st.bar_chart(quote_code_dict)
+    #st.bar_chart(quote_code_dict)
+
+    data = quote_code_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Shop code':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Shop code", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     quote_code_dict = {}
     quote_end_flows = ['Pay - Inforce Policy', 'Pay - Credit Card']
@@ -203,4 +235,12 @@ elif st.session_state["authentication_status"]:
     
     st.markdown("## Puchases per shop")
     st.markdown("Note: Due to technical limitations from the data extraction this chart actually shows the number of users who clicked pay by credit card plus the number of users who successfully purchased using PayNow.")
-    st.bar_chart(quote_code_dict)
+    #st.bar_chart(quote_code_dict)
+
+    data = quote_code_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Shop code':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Shop code", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)

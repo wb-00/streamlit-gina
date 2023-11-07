@@ -9,6 +9,7 @@ import datetime
 import folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+import altair as alt
 
 st.set_page_config(
     page_title="GINA.sg Stats",
@@ -103,7 +104,15 @@ elif st.session_state["authentication_status"]:
         time_dict[time] += 1
     
     st.markdown("## Messages per hour")
-    st.bar_chart(time_dict)
+    #st.bar_chart(time_dict)
+
+    data = time_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Time':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Time", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Quotes
     traffic = []
@@ -121,7 +130,15 @@ elif st.session_state["authentication_status"]:
         time_dict[time] += 1
     
     st.markdown("## Complete quotes per hour")
-    st.bar_chart(time_dict)
+    #st.bar_chart(time_dict)
+
+    data = time_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Time':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Time", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
     
     # Purchases
     traffic = []
@@ -140,4 +157,12 @@ elif st.session_state["authentication_status"]:
     
     st.markdown("## Purchases per day")
     st.markdown("Note: Due to technical limitations from the data extraction this chart actually shows the number of users who clicked pay by credit card plus the number of users who successfully purchased using PayNow.")
-    st.bar_chart(time_dict)
+    #st.bar_chart(time_dict)
+
+    data = time_dict
+    c = (
+        alt.Chart(pd.DataFrame({'Time':list(data.keys()), 'Number':list(data.values())}))
+                  .mark_bar()
+                  .encode(x="Time", y="Number")
+                 )
+    st.altair_chart(c, use_container_width=True)
