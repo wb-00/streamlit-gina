@@ -11,6 +11,15 @@ import plotly.express as px
 import streamlit_authenticator as stauth
 import streamlit as st
 
+st.set_page_config(
+    page_title="GINA.sg Stats",
+    page_icon=":whale:",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+    }
+)
+
 ## Auth
 import yaml
 from yaml.loader import SafeLoader

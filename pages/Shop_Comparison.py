@@ -10,6 +10,16 @@ from geopy.exc import GeocoderTimedOut
 import streamlit as st
 
 
+st.set_page_config(
+    page_title="GINA.sg Stats",
+    page_icon=":whale:",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+    }
+)
+
+
 if st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
 elif st.session_state["authentication_status"] is None:
