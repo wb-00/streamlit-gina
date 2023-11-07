@@ -146,7 +146,6 @@ elif st.session_state["authentication_status"]:
     addresses = [a.split(",")[0]+","+a.split(",")[2][:-7] for a in addresses]
     coordinates = geocode_addresses(addresses)
     
-    @st.cache_data
     def display_map(coordinates):
         map = folium.Map(location=[1.3521, 103.8198], zoom_start=12)  # Use the center of Singapore as the starting location
     
