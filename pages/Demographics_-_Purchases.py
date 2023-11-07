@@ -12,18 +12,26 @@ from geopy.exc import GeocoderTimedOut
 
 st.markdown("# Demographics - Purchases")
 
+# Set up todays date and start and end dates for the dataframe
 today = datetime.date.today()
 dates_list = []
-df_list = []
-for i in range(1):
+for i in range(1): # We go back 4 weeks
     dates_list.append((str(today-datetime.timedelta(days = (i+1)*7)), str(today-datetime.timedelta(days = 1+(i*7)))))
-for date_start, date_end in dates_list:
-    d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
-    df_list.append(d)
-# Concatenate all dataframes into one
-d = pd.concat(df_list, ignore_index=True)
-df = d.copy()
-df = df.sort_values(by=['Date','Time'])
+
+@st.cache_data
+def get_data_extraction(dates_list):
+    df_list = []
+    for date_start, date_end in dates_list:
+        d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
+        df_list.append(d)
+    # Concatenate all dataframes into one
+    d = pd.concat(df_list, ignore_index=True)
+    d = d.sort_values(by=['Date','Time'])
+    return d
+    
+df = get_data_extraction(dates_list)
+
+st.sidebar.markdown(f"Data from {dates_list[-1][0]} to {dates_list[0][1]}.")
 
 numbers = df['User/Session ID'].unique()
 testernumbers = []
@@ -50,7 +58,6 @@ for i in range(len(numbers)):
         dellist.append(i)
 
 numbers = np.delete(numbers, dellist)
-st.sidebar.markdown(f"Data from {date_start} to {date_end}.")
 
 def find_successive_line(input_string, phrase_to_find, i):
     # Find the starting index of the phrase
@@ -89,6 +96,7 @@ def get_buyer_numbers(df, nums):
 
 buyers = get_buyer_numbers(df, numbers)
 
+@st.cache_data
 def get_addresses(df, nums):
     addresses = []
     for num in nums:
@@ -105,6 +113,7 @@ def get_addresses(df, nums):
 
 addresses = get_addresses(df, buyers)
 
+@st.cache_data
 def geocode_addresses(addresses):
     geolocator = Nominatim(user_agent="myGeocoder")
     coordinates = []
@@ -120,6 +129,7 @@ def geocode_addresses(addresses):
 addresses = [a.split(",")[0]+","+a.split(",")[2][:-7] for a in addresses]
 coordinates = geocode_addresses(addresses)
 
+@st.cache_data
 def display_map(coordinates):
     map = folium.Map(location=[1.3521, 103.8198], zoom_start=12)  # Use the center of Singapore as the starting location
 
@@ -130,51 +140,55 @@ def display_map(coordinates):
 
 display_map(coordinates)
 
-nums = buyers
-demodata = {}
-for number in nums:
-    demodata[number] = (" ", 0)
-    dates = df['Date'].loc[df['User/Session ID'] == number].unique()
-    for date in dates:
-        respdata = df['Response Data'].loc[(df['User/Session ID'] == number) & (df['Date'] == date)]
-        for resp in respdata:
-            if isinstance(resp, str):
-                if "Policyholder address: " in resp:
-                    demodata[number] = (resp+"\n"+demodata[number][0], date)
-        if demodata[number] == 0:
-            print(respdata)
+@st.cache_data
+def get_demodata(df, nums):
+    demodata = {}
+    for number in nums:
+        demodata[number] = (" ", 0)
+        dates = df['Date'].loc[df['User/Session ID'] == number].unique()
+        for date in dates:
+            respdata = df['Response Data'].loc[(df['User/Session ID'] == number) & (df['Date'] == date)]
+            for resp in respdata:
+                if isinstance(resp, str):
+                    if "Policyholder address: " in resp:
+                        demodata[number] = (resp+"\n"+demodata[number][0], date)
+            if demodata[number] == 0:
+                print(respdata)
+        
+    buyerinfo = []
+    for i in demodata:
+        buyerdict = {
+            "Date of Birth": "Unknown",
+            "Gender": "Unknown",
+            "Plan Type": "Unknown",
+            "Lead Time": -1
+        }
     
-buyerinfo = []
-for i in demodata:
-    buyerdict = {
-        "Date of Birth": "Unknown",
-        "Gender": "Unknown",
-        "Plan Type": "Unknown",
-        "Lead Time": -1
-    }
+        dob = find_successive_line(demodata[i][0], "Policyholder date of birth: ", i)
+        gender = find_successive_line(demodata[i][0], "Policyholder gender: ", i)
+        plantype = find_successive_line(demodata[i][0], "Coverage plan: ", i)
+        depdate = find_successive_line(demodata[i][0], "Departure date: ", i)
+        searchdate = demodata[i][1]
+        if depdate != "":
+            depdate = pd.to_datetime(depdate, dayfirst=True)
+            searchdate = pd.to_datetime(searchdate, dayfirst=False)
+            buyerdict["Lead Time"] = (depdate - searchdate).days
+            if int((depdate-searchdate).days) < 0:
+                print(depdate)
+                print(searchdate)
+                print(i)
+        if dob != "":
+            buyerdict["Date of Birth"] = pd.to_datetime(dob, dayfirst=True)
+        if gender != "":
+            buyerdict["Gender"] = gender
+        if plantype != "":
+            buyerdict["Plan Type"] = plantype
+        buyerinfo.append(buyerdict)
+    
+    return pd.DataFrame(buyerinfo)
 
-    dob = find_successive_line(demodata[i][0], "Policyholder date of birth: ", i)
-    gender = find_successive_line(demodata[i][0], "Policyholder gender: ", i)
-    plantype = find_successive_line(demodata[i][0], "Coverage plan: ", i)
-    depdate = find_successive_line(demodata[i][0], "Departure date: ", i)
-    searchdate = demodata[i][1]
-    if depdate != "":
-        depdate = pd.to_datetime(depdate, dayfirst=True)
-        searchdate = pd.to_datetime(searchdate, dayfirst=False)
-        buyerdict["Lead Time"] = (depdate - searchdate).days
-        if int((depdate-searchdate).days) < 0:
-            print(depdate)
-            print(searchdate)
-            print(i)
-    if dob != "":
-        buyerdict["Date of Birth"] = pd.to_datetime(dob, dayfirst=True)
-    if gender != "":
-        buyerdict["Gender"] = gender
-    if plantype != "":
-        buyerdict["Plan Type"] = plantype
-    buyerinfo.append(buyerdict)
-
-df_ = pd.DataFrame(buyerinfo)
+nums = buyers
+df_ = get_demodata(df, nums)
 
 # Decade of Birth
 dob_list = df_['Date of Birth'].tolist()

@@ -73,20 +73,26 @@ def find_successive_line(input_string, phrase_to_find, i):
     else:
         # print("Phrase not found in the input string: "+phrase_to_find+str(i))
         return ""
-
+# Set up todays date and start and end dates for the dataframe
 today = datetime.date.today()
 dates_list = []
-df_list = []
-for i in range(1):
+for i in range(1): # We go back 4 weeks
     dates_list.append((str(today-datetime.timedelta(days = (i+1)*7)), str(today-datetime.timedelta(days = 1+(i*7)))))
-for date_start, date_end in dates_list:
-    d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
-    df_list.append(d)
-# Concatenate all dataframes into one
-d = pd.concat(df_list, ignore_index=True)
-df = d.copy()
-df = df.sort_values(by=['Date','Time'])
-st.sidebar.markdown(f"Data from {date_start} to {date_end}.")
+
+@st.cache_data
+def get_data_extraction(dates_list):
+    df_list = []
+    for date_start, date_end in dates_list:
+        d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
+        df_list.append(d)
+    # Concatenate all dataframes into one
+    d = pd.concat(df_list, ignore_index=True)
+    d = d.sort_values(by=['Date','Time'])
+    return d
+    
+df = get_data_extraction(dates_list)
+
+st.sidebar.markdown(f"Data from {dates_list[-1][0]} to {dates_list[0][1]}.")
 
 numbers = df['User/Session ID'].unique()
 testernumbers = []

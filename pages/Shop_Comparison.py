@@ -32,18 +32,26 @@ df_ = pd.DataFrame({"Coffee Shop Name":[
 st.write(df_)
                     
 
+# Set up todays date and start and end dates for the dataframe
 today = datetime.date.today()
 dates_list = []
-df_list = []
-for i in range(1):
+for i in range(1): # We go back 4 weeks
     dates_list.append((str(today-datetime.timedelta(days = (i+1)*7)), str(today-datetime.timedelta(days = 1+(i*7)))))
-for date_start, date_end in dates_list:
-    d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
-    df_list.append(d)
-# Concatenate all dataframes into one
-d = pd.concat(df_list, ignore_index=True)
-df = d.copy()
-df = df.sort_values(by=['Date','Time'])
+
+@st.cache_data
+def get_data_extraction(dates_list):
+    df_list = []
+    for date_start, date_end in dates_list:
+        d = pd.read_excel(f'https://pd-gina.s3-ap-southeast-1.amazonaws.com/data_extraction/gina_{date_start}_{date_end}.xlsx')
+        df_list.append(d)
+    # Concatenate all dataframes into one
+    d = pd.concat(df_list, ignore_index=True)
+    d = d.sort_values(by=['Date','Time'])
+    return d
+    
+df = get_data_extraction(dates_list)
+
+st.sidebar.markdown(f"Data from {dates_list[-1][0]} to {dates_list[0][1]}.")
 
 numbers = df['User/Session ID'].unique()
 testernumbers = []
@@ -74,7 +82,6 @@ numbers = np.delete(numbers, dellist)
 dates_list = sorted(df['Date'].unique())
 dates_dict = {}
 kopinumbers = []
-st.sidebar.markdown(f"Data from {date_start} to {date_end}.")
 
 for date in dates_list:
     kopinumbers_ = []
@@ -94,6 +101,7 @@ for date in dates_list:
 
 nonkopinumbers = [e for e in numbers if not e in kopinumbers]
 
+@st.cache_data
 def find_shop_code(df, nums):
     destinations = {}
     for num in nums:
@@ -115,19 +123,24 @@ for i in shop_code_to_phone.keys():
 st.markdown("## Redemptions per shop")
 st.bar_chart(code_dict)
 
-voucher_dict = {}
-for k in shop_code_to_phone.keys():
-    total = 0
-    for num in shop_code_to_phone[k]:
-        found = False
-        flows = df['Response Flow'].loc[df['User/Session ID'] == num]
-        for flow in flows:
-            if isinstance(flow, str):
-                if flow == 'Campaign - Kopi 2023 - Broadcast Voucher':
-                    found = True
-        if found:
-            total += 1
-    voucher_dict[k] = total
+@st.cache_data
+def get_voucher_dict(df, shop_code_to_phone):
+    voucher_dict = {}
+    for k in shop_code_to_phone.keys():
+        total = 0
+        for num in shop_code_to_phone[k]:
+            found = False
+            flows = df['Response Flow'].loc[df['User/Session ID'] == num]
+            for flow in flows:
+                if isinstance(flow, str):
+                    if flow == 'Campaign - Kopi 2023 - Broadcast Voucher':
+                        found = True
+            if found:
+                total += 1
+        voucher_dict[k] = total
+    return voucher_dict
+
+voucher_dict = get_voucher_dict(df, shop_code_to_phone)
 
 st.markdown("## Vouchers per shop")
 st.bar_chart(voucher_dict)
