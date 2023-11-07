@@ -155,7 +155,7 @@ elif st.session_state["authentication_status"]:
         time = str(time).split(":")[0][-2:]+':00'
         time_dict[time] += 1
     
-    st.markdown("## Purchases per day")
+    st.markdown("## Purchases per hour")
     st.markdown("Note: Due to technical limitations from the data extraction this chart actually shows the number of users who clicked pay by credit card plus the number of users who successfully purchased using PayNow.")
     #st.bar_chart(time_dict)
 
