@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    william:
+      email: william@pand.ai
+      name: William Brazier
+      password: $2b$12$Deo.0w1V1NYsemLipit8KOOw6HkgLqYb0a2k1r1ppbMqt2TXTceJK
+    joy:
+      email: joy@pand.ai
+      name: Joy Zhao
+      password: $2b$12$UesQ4xSYUeC685BKhdHK7.fdvRVlirDmDRvVEVs1as0/jRgo.v5Wa
+cookie:
+  expiry_days: 0
+  key: 'duhfjkshfdskfabaskdhgasuydfsajfd' # Must be string
+  name: 'uxyvcashhbvajhbvkjasfudysfbkjashdfuiasdtf'
+preauthorized:
+  emails:
+  - shin@pand.ai
